@@ -20,11 +20,15 @@ from torchvision.utils import make_grid
 
 def load_model_from_config(config, ckpt):
     print(f"Loading model from {ckpt}")
-    pl_sd = torch.load(ckpt, map_location="cpu")
+    pl_sd = torch.load(ckpt)
     sd = pl_sd["state_dict"]
     model = instantiate_from_config(config.model)
     m, u = model.load_state_dict(sd, strict=False)
-    model.to("cuda")
+    # Ensure CUDA is available before moving the model
+    if torch.cuda.is_available():
+        model.to("cuda")
+    else:
+        raise Exception("Missing cuda device")
     model.eval()
     return model
 
