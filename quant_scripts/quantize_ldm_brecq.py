@@ -83,7 +83,7 @@ if __name__ == '__main__':
     from torch.utils.data import DataLoader
 
     dataset = DiffusionInputDataset('imagenet_input_20steps.pth')
-    print(dataset)
+    print(len(dataset))
     data_loader = DataLoader(dataset=dataset, batch_size=8, shuffle=True)
 
     wq_params = {'n_bits': n_bits_w, 'channel_wise': False, 'scale_method': 'mse'}
