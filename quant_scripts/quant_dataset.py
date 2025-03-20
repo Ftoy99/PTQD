@@ -1,9 +1,10 @@
 import torch
 from torch.utils.data.dataset import Dataset
 
+
 class DiffusionInputDataset(Dataset):
     def __init__(self, data_path):
-        data_list = torch.load(data_path, map_location='cpu') ## its a list of tuples of tensors
+        data_list = torch.load(data_path, map_location='cpu')  ## its a list of tuples of tensors
         self.xt_list = []
         self.t_list = []
         self.y_list = []
@@ -16,13 +17,14 @@ class DiffusionInputDataset(Dataset):
 
     def __len__(self):
         return len(self.xt_list)
-    
+
     def __getitem__(self, idx):
         return self.xt_list[idx], self.t_list[idx], self.y_list[idx]
 
+
 class lsunInputDataset(Dataset):
     def __init__(self, data_path):
-        data_list = torch.load(data_path) ## its a list of tuples of tensors
+        data_list = torch.load(data_path)  ## its a list of tuples of tensors
         self.xt_list = []
         self.t_list = []
         self.y_list = []
@@ -35,6 +37,6 @@ class lsunInputDataset(Dataset):
 
     def __len__(self):
         return len(self.xt_list)
-    
+
     def __getitem__(self, idx):
         return self.xt_list[idx], self.t_list[idx]
