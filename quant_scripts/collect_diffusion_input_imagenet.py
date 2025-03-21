@@ -76,8 +76,8 @@ if __name__ == '__main__':
     import ldm.globalvar as globalvar
 
     input_list = globalvar.getInputList()
-    print(input_list[0][0].shape)
-    print(input_list[0][1].shape)
-    print(input_list[0][2].shape)
+    # print(input_list[0][0].shape)
+    # print(input_list[0][1].shape)
+    # print(input_list[0][2].shape)
     torch.save(input_list, 'imagenet_input_{}steps.pth'.format(ddim_steps))
     sys.exit(0)
