@@ -37,7 +37,7 @@ if __name__ == '__main__':
     sampler = DDIMSampler(model)
 
     # classes = [25, 187, 448, 992]   # define classes to be sampled here
-    classes = [i for i in range(1000)]
+    classes = [i for i in range(10)]
     n_samples_per_class = 4
 
     ddim_steps = 20
@@ -76,6 +76,7 @@ if __name__ == '__main__':
     import ldm.globalvar as globalvar
 
     input_list = globalvar.getInputList()
-    print(input_list)
+    for x in input_list:
+        print(x)
     torch.save(input_list, 'imagenet_input_{}steps.pth'.format(ddim_steps))
     sys.exit(0)
