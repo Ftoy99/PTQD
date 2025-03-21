@@ -6,7 +6,6 @@ sys.path.append('./taming-transformers')
 import os
 
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'
-from taming.models import vqgan
 
 import torch
 from omegaconf import OmegaConf
@@ -14,10 +13,6 @@ from omegaconf import OmegaConf
 from ldm.util import instantiate_from_config
 from ldm.models.diffusion.ddim import DDIMSampler
 
-import numpy as np
-from PIL import Image
-from einops import rearrange
-from torchvision.utils import make_grid
 
 
 def load_model_from_config(config, ckpt):
@@ -42,7 +37,7 @@ if __name__ == '__main__':
     sampler = DDIMSampler(model)
 
     # classes = [25, 187, 448, 992]   # define classes to be sampled here
-    classes = [i for i in range(10)]
+    classes = [i for i in range(1000)]
     n_samples_per_class = 4
 
     ddim_steps = 20
