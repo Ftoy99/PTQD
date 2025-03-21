@@ -1,16 +1,15 @@
 import sys, time
 sys.path.append(".")
 sys.path.append('./taming-transformers')
-from taming.models import vqgan
 
 import torch
 torch.cuda.manual_seed(3407)
-import torch.nn as nn
+
 from omegaconf import OmegaConf
 
 from ldm.util import instantiate_from_config
-from ldm.models.diffusion.ddim import DDIMSampler, DDIMSampler_quantCorrection_imagenet
-from ldm.models.diffusion.ddpm import DDPM
+from ldm.models.diffusion.ddim import DDIMSampler_quantCorrection_imagenet
+
 
 import numpy as np 
 from PIL import Image
@@ -29,7 +28,7 @@ def load_model_from_config(config, ckpt):
     pl_sd = torch.load(ckpt, map_location="cpu")
     sd = pl_sd["state_dict"]
     model = instantiate_from_config(config.model)
-    m, u = model.load_state_dict(sd, strict=False)
+    model.load_state_dict(sd, strict=False)
     model.cuda()
     model.eval()
     return model
@@ -79,6 +78,7 @@ if __name__ == '__main__':
     qnn.disable_network_output_quantization()
 
     print('First run to init model...')
+
     with torch.no_grad():
         _ = qnn(cali_images[:32].to(device),cali_t[:32].to(device),cali_y[:32].to(device))
 
