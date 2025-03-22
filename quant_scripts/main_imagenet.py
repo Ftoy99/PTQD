@@ -41,7 +41,7 @@ if __name__ == '__main__':
     sampler = DDIMSampler(model)
 
     # classes = [25, 187, 448, 992]  # define classes to be sampled here
-    classes = [100, 200, 300, 400, 500, 600, 700, 800, 900,1000]  # define classes to be sampled here
+    classes = [25, 187, 448, 992,100, 200, 300, 400, 500, 600, 700, 800, 900]  # define classes to be sampled here
     n_samples_per_class = 6
 
     ddim_steps = 20
