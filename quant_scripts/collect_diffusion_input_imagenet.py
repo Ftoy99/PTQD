@@ -73,7 +73,6 @@ if __name__ == '__main__':
 
     ## save diffusion input data
     import ldm.globalvar as globalvar
-
     input_list = globalvar.getInputList()
     torch.save(input_list, 'imagenet_input_{}steps.pth'.format(ddim_steps))
     sys.exit(0)
