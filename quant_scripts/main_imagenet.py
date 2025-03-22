@@ -2,9 +2,6 @@ import sys
 
 sys.path.append(".")
 sys.path.append('./taming-transformers')
-import os
-
-os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 
 import torch
 from omegaconf import OmegaConf
