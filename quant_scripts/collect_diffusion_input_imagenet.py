@@ -14,7 +14,6 @@ from ldm.util import instantiate_from_config
 from ldm.models.diffusion.ddim import DDIMSampler
 
 
-
 def load_model_from_config(config, ckpt):
     print(f"Loading model from {ckpt}")
     pl_sd = torch.load(ckpt)  # , map_location="cpu")
@@ -76,8 +75,5 @@ if __name__ == '__main__':
     import ldm.globalvar as globalvar
 
     input_list = globalvar.getInputList()
-    # print(input_list[0][0].shape)
-    # print(input_list[0][1].shape)
-    # print(input_list[0][2].shape)
     torch.save(input_list, 'imagenet_input_{}steps.pth'.format(ddim_steps))
     sys.exit(0)
