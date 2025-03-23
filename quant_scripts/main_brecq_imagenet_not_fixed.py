@@ -8,10 +8,9 @@ torch.cuda.manual_seed(3407)
 from omegaconf import OmegaConf
 
 from ldm.util import instantiate_from_config
-from ldm.models.diffusion.ddim import DDIMSampler_quantCorrection_imagenet
+from ldm.models.diffusion.ddim import DDIMSampler_quantCorrection_imagenet, DDIMSampler
 
-
-import numpy as np 
+import numpy as np
 from PIL import Image
 from einops import rearrange
 from torchvision.utils import make_grid
@@ -98,10 +97,10 @@ if __name__ == '__main__':
     qnn.eval()
     setattr(model.model, 'diffusion_model', qnn)
 
-    sampler = DDIMSampler_quantCorrection_imagenet(model, num_bit=4, correct=True)
+    sampler = DDIMSampler(model)
 
 
-    classes = [25, 187, 448, 992, 100, 200, 300, 400, 500, 600, 700, 800, 900]   # define classes to be sampled here
+    classes = [25, 187, 448, 992, 100, 200, 300, 400, 500, 600, 700, 800, 900]    # define classes to be sampled here
     n_samples_per_class = 6
 
     ## Quality, sampling speed and diversity are best controlled via the `scale`, `ddim_steps` and `ddim_eta` variables
@@ -149,5 +148,5 @@ if __name__ == '__main__':
     # to image
     grid = 255. * rearrange(grid, 'c h w -> h w c').cpu().numpy()
     image_to_save = Image.fromarray(grid.astype(np.uint8))
-    image_to_save.save("imagenet_brecq_w{}a{}_step{}_eta{}_scale{}_corrected.jpg".format(n_bits_w,n_bits_a,ddim_steps, ddim_eta, scale))
+    image_to_save.save("imagenet_brecq_w{}a{}_step{}_eta{}_scale{}_not_corrected.jpg".format(n_bits_w,n_bits_a,ddim_steps, ddim_eta, scale))
 

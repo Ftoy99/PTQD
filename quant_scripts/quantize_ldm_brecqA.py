@@ -1,4 +1,5 @@
 import sys
+
 sys.path.append(".")
 sys.path.append('./taming-transformers')
 import os
@@ -21,6 +22,7 @@ from quant_scripts.brecq_adaptive_rounding import AdaRoundQuantizer
 n_bits_w = 4
 n_bits_a = 8
 
+
 def load_model_from_config(config, ckpt):
     print(f"Loading model from {ckpt}")
     pl_sd = torch.load(ckpt, map_location="cpu")
@@ -31,10 +33,12 @@ def load_model_from_config(config, ckpt):
     model.eval()
     return model
 
+
 def get_model():
-    config = OmegaConf.load("configs/latent-diffusion/cin256-v2.yaml")  
+    config = OmegaConf.load("configs/latent-diffusion/cin256-v2.yaml")
     model = load_model_from_config(config, "models/ldm/cin256-v2/model.ckpt")
     return model
+
 
 def get_train_samples(train_loader, num_samples):
     image_data, t_data, y_data = [], [], []
@@ -44,10 +48,14 @@ def get_train_samples(train_loader, num_samples):
         y_data.append(y)
         if len(image_data) >= num_samples:
             break
-    return torch.cat(image_data, dim=0)[:num_samples], torch.cat(t_data, dim=0)[:num_samples], torch.cat(y_data, dim=0)[:num_samples]
+    return torch.cat(image_data, dim=0)[:num_samples], torch.cat(t_data, dim=0)[:num_samples], torch.cat(y_data, dim=0)[
+                                                                                               :num_samples]
 
-global cnt 
-cnt=0
+
+global cnt
+cnt = 0
+
+
 def count_recon_times(model):
     global cnt
     for name, module in model.named_children():
@@ -68,6 +76,7 @@ def count_recon_times(model):
         else:
             count_recon_times(module)
 
+
 if __name__ == '__main__':
     model = get_model()
     model = model.model.diffusion_model
@@ -78,7 +87,7 @@ if __name__ == '__main__':
 
     dataset = DiffusionInputDataset('imagenet_input_20steps.pth')
     data_loader = DataLoader(dataset=dataset, batch_size=8, shuffle=True)
-    
+
     wq_params = {'n_bits': n_bits_w, 'channel_wise': False, 'scale_method': 'mse'}
     aq_params = {'n_bits': n_bits_a, 'channel_wise': False, 'scale_method': 'mse', 'leaf_param': True}
     qnn = QuantModel(model=model, weight_quant_params=wq_params, act_quant_params=aq_params)
@@ -95,13 +104,15 @@ if __name__ == '__main__':
 
     print('First run to init model...')
     with torch.no_grad():
-        _ = qnn(cali_images[:32].to(device),cali_t[:32].to(device),cali_y[:32].to(device))
+        _ = qnn(cali_images[:32].to(device), cali_t[:32].to(device), cali_y[:32].to(device))
 
     # Kwargs for weight rounding calibration
     kwargs = dict(cali_images=cali_images, cali_t=cali_t, cali_y=cali_y, iters=10000, weight=0.01, asym=True,
-                    b_range=(20, 2), warmup=0.2, act_quant=False, opt_mode='mse', batch_size=32)
+                  b_range=(20, 2), warmup=0.2, act_quant=False, opt_mode='mse', batch_size=32)
 
     pass_block = 0
+
+
     def recon_model(model: nn.Module):
         """
         Block reconstruction. For the first and last layers, we can only apply layer reconstruction.
@@ -118,34 +129,37 @@ if __name__ == '__main__':
 
             elif isinstance(module, ResBlock):
                 pass_block -= 1
-                if pass_block < 0 :
+                if pass_block < 0:
                     print('Reconstruction for ResBlock {}'.format(name))
                     block_reconstruction_two_input(qnn, module, **kwargs)
             elif isinstance(module, BasicTransformerBlock):
                 pass_block -= 1
-                if pass_block < 0 :
+                if pass_block < 0:
                     print('Reconstruction for BasicTransformerBlock {}'.format(name))
                     block_reconstruction_two_input(qnn, module, **kwargs)
             else:
                 recon_model(module)
-        
+
+
     # Start calibration
     for name, module in qnn.named_modules():
         if isinstance(module, QuantModule) and module.ignore_reconstruction is False:
             module.weight_quantizer.soft_targets = False
-            module.weight_quantizer = AdaRoundQuantizer(uaq=module.weight_quantizer, round_mode='learned_hard_sigmoid', weight_tensor=module.org_weight.data)
+            module.weight_quantizer = AdaRoundQuantizer(uaq=module.weight_quantizer, round_mode='learned_hard_sigmoid',
+                                                        weight_tensor=module.org_weight.data)
 
-    ckpt = torch.load('quantw4_ldm_brecq.pth', map_location='cpu') ## replace first step checkpoint here
+    ckpt = torch.load('quantw4_ldm_brecq.pth', map_location='cpu')  ## replace first step checkpoint here
     qnn.load_state_dict(ckpt, False)
 
     qnn.set_quant_state(True, True)
     with torch.no_grad():
-        _ = qnn(cali_images[:32].to(device),cali_t[:32].to(device),cali_y[:32].to(device))
+        _ = qnn(cali_images[:32].to(device), cali_t[:32].to(device), cali_y[:32].to(device))
     # Disable output quantization because network output
     # does not get involved in further computation
     qnn.disable_network_output_quantization()
     # Kwargs for activation rounding calibration
-    kwargs = dict(cali_images=cali_images, cali_t=cali_t, cali_y=cali_y, iters=5000, act_quant=True, opt_mode='mse', lr=4e-4, p=2.4, batch_size=16)
+    kwargs = dict(cali_images=cali_images, cali_t=cali_t, cali_y=cali_y, iters=5000, act_quant=True, opt_mode='mse',
+                  lr=4e-4, p=2.4, batch_size=16)
     recon_model(qnn)
     qnn.set_quant_state(weight_quant=True, act_quant=True)
     torch.save(qnn.state_dict(), 'quantw{}a{}_ldm_brecq.pth'.format(n_bits_w, n_bits_a))
