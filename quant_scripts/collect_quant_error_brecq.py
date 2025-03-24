@@ -2,7 +2,6 @@ import sys
 
 sys.path.append(".")
 sys.path.append('./taming-transformers')
-from taming.models import vqgan
 import os
 
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'
