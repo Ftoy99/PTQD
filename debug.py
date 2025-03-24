@@ -10,9 +10,9 @@ import torch
 
 inputs_collected = torch.load("data_error_t_w4a8_scale3.0_eta0.0_step20.pth")
 for x in inputs_collected:
-    print(x[0][0])
-    print(x[0][1])
-    print(x[0][2])
-    print(x[0][3])
-    print(x[0][4])
-    print(x[0][5])
+    print(x[100][0])
+    print(x[100][1])
+    print(x[100][2])
+    print(x[100][3])
+    print(x[100][4])
+    print(x[100][5])
